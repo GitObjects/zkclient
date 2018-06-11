@@ -16,7 +16,7 @@ namespace ZookeeperClient.Tests
         public ZookeeperClientTests()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            _client = new Client(new ZookeeperClientOptions("172.18.20.132:2181")
+            _client = new Client(new ZookeeperClientOptions("127.0.0.1:32770,127.0.0.1:32769,127.0.0.1:32768")
             {
                 SessionTimeout = TimeSpan.FromSeconds(20),
                 OperatingTimeout = TimeSpan.FromSeconds(30)
