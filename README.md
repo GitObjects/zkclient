@@ -1,4 +1,4 @@
-## Rabbit ZooKeeper Extensions
+## ZooKeeper Extensions
 
 The project uses the [Apache ZooKeeper .NET async Client](https://www.nuget.org/packages/ZooKeeperNetEx/) component, in addition to providing the basic zk operation, but also additional encapsulation of the commonly used functions in order to allow. Net developers to better use zookeeper.
 ## Features

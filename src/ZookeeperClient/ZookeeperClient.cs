@@ -12,12 +12,12 @@ using TaskEx = System.Threading.Tasks.Task;
 
 #endif
 
-namespace Rabbit.Zookeeper.Implementation
+namespace ZookeeperClient
 {
     /// <summary>
     /// ZooKeeper客户端。
     /// </summary>
-    public class ZookeeperClient : Watcher, IZookeeperClient
+    public class Client : Watcher, IZookeeperClient
     {
         #region Field
 
@@ -42,7 +42,7 @@ namespace Rabbit.Zookeeper.Implementation
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
         /// <exception cref="ArgumentNullException"><paramref name="connectionString"/> 为空。</exception>
-        public ZookeeperClient(string connectionString)
+        public Client(string connectionString)
             : this(new ZookeeperClientOptions(connectionString))
         {
         }
@@ -51,7 +51,7 @@ namespace Rabbit.Zookeeper.Implementation
         /// 创建一个新的ZooKeeper客户端。
         /// </summary>
         /// <param name="options">客户端选项。</param>
-        public ZookeeperClient(ZookeeperClientOptions options)
+        public Client(ZookeeperClientOptions options)
         {
             Options = options;
             ZooKeeper = CreateZooKeeper();

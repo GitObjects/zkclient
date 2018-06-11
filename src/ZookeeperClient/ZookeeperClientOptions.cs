@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rabbit.Zookeeper
+namespace ZookeeperClient
 {
     /// <summary>
     /// ZooKeeper客户端选项。

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Rabbit.Zookeeper
+namespace ZookeeperClient
 {
     /// <summary>
     /// 一个抽象的ZooKeeper客户端。

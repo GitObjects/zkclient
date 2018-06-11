@@ -1,5 +1,4 @@
 ﻿using org.apache.zookeeper;
-using Rabbit.Zookeeper.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Rabbit.Zookeeper.Tests
+namespace ZookeeperClient.Tests
 {
     public class ZookeeperClientTests
     {
@@ -17,7 +16,7 @@ namespace Rabbit.Zookeeper.Tests
         public ZookeeperClientTests()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            _client = new ZookeeperClient(new ZookeeperClientOptions("172.18.20.132:2181")
+            _client = new Client(new ZookeeperClientOptions("172.18.20.132:2181")
             {
                 SessionTimeout = TimeSpan.FromSeconds(20),
                 OperatingTimeout = TimeSpan.FromSeconds(30)

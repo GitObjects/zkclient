@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
-    <AssemblyName>Rabbit.Zookeeper.Tests</AssemblyName>
-    <PackageId>Rabbit.Zookeeper.Tests</PackageId>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>ZookeeperClient.Tests</AssemblyName>
+    <PackageId>ZookeeperClient.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Rabbit.Zookeeper\Rabbit.Zookeeper.csproj" />
+    <ProjectReference Include="..\..\src\ZookeeperClient\ZookeeperClient.csproj" />
   </ItemGroup>
 
   <ItemGroup>
