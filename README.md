@@ -12,7 +12,7 @@ The project uses the [Apache ZooKeeper .NET async Client](https://www.nuget.org/
 ## Instructions for use
 ### Create connection
 
-    IZookeeperClient client = new ZookeeperClient(new ZookeeperClientOptions("172.18.20.132:2181")
+    IZookeeperClient client = new Client(new ZookeeperClientOptions("172.18.20.132:2181")
             {
                 BasePath = "/", //default value
                 ConnectionTimeout = TimeSpan.FromSeconds(10), //default value
