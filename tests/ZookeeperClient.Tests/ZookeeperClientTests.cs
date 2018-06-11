@@ -15,7 +15,7 @@ namespace ZookeeperClient.Tests
 
         public ZookeeperClientTests()
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            System.Text.Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             _client = new Client(new ZookeeperClientOptions("127.0.0.1:32770,127.0.0.1:32769,127.0.0.1:32768")
             {
                 SessionTimeout = TimeSpan.FromSeconds(20),
@@ -71,10 +71,10 @@ namespace ZookeeperClient.Tests
             if (await _client.ExistsAsync(path))
                 await _client.DeleteAsync(path);
 
-            await _client.CreateEphemeralAsync(path, Encoding.UTF8.GetBytes("abc"));
+            await _client.CreateEphemeralAsync(path, System.Text.Encoding.UTF8.GetBytes("abc"));
 
             var data = (await _client.GetDataAsync(path)).ToArray();
-            Assert.Equal("abc", Encoding.UTF8.GetString(data));
+            Assert.Equal("abc", System.Text.Encoding.UTF8.GetString(data));
             await _client.DeleteAsync(path);
         }
 
