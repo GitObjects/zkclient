@@ -15,8 +15,8 @@ namespace ZookeeperClient.Tests
 
         public ZookeeperClientTests()
         {
-            System.Text.Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            _client = new Client(new ZookeeperClientOptions("127.0.0.1:32770,127.0.0.1:32769,127.0.0.1:32768")
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            _client = new Client(new ZookeeperClientOptions("localhost:32776,localhost:32775,localhost:32774")
             {
                 SessionTimeout = TimeSpan.FromSeconds(20),
                 OperatingTimeout = TimeSpan.FromSeconds(30)
@@ -24,43 +24,19 @@ namespace ZookeeperClient.Tests
         }
 
         [Fact]
-        public async Task GetChildrenAsyncTest()
+        public async Task CreateRecursiveAndDeleteRecursiveTest()
         {
-            var childrens = await _client.GetChildrenAsync("/");
+            var pathRoot = $"/{DateTime.Now:yyyy_MM_dd_HH_mm_ss_ff}";
+            var path = $"{pathRoot}/1/2";
+            if (await _client.ExistsAsync(pathRoot))
+                await _client.DeleteRecursiveAsync(pathRoot);
 
-            Assert.NotNull(childrens);
+            await _client.CreateRecursiveAsync(path, null);
+            Assert.True(await _client.ExistsAsync(path));
 
-            Assert.True(childrens.Any());
-
-            childrens = await _client.GetChildrenAsync("/ApiRouteRoot");
-            Assert.NotNull(childrens);
-
-            Assert.True(childrens.Any());
-        }
-
-        [Fact]
-        public async Task ExistsAsyncTest()
-        {
-            var result = await _client.ExistsAsync("/");
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task GetDataAsyncTest()
-        {
-            var data = await _client.GetDataAsync("/");
-            Assert.NotNull(data);
-
-            data = await _client.GetDataAsync("/chanelInfo");
-            Assert.NotNull(data);
-        }
-
-        [Fact]
-        public async Task ReconnectionTest()
-        {
-            Assert.True(await _client.ExistsAsync("/"));
-            await Task.Delay(TimeSpan.FromSeconds(8));
-            Assert.True(await _client.ExistsAsync("/"));
+            await _client.DeleteRecursiveAsync(pathRoot);
+            if (await _client.ExistsAsync(pathRoot))
+                throw new Exception("删除失败");
         }
 
         [Fact]
@@ -97,6 +73,86 @@ namespace ZookeeperClient.Tests
                     Assert.True(false, "创建节点失败");
             }
             Assert.False(await _client.ExistsAsync(path));
+        }
+
+        [Fact]
+        public async Task ExistsAsyncTest()
+        {
+            var result = await _client.ExistsAsync("/");
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task GetChildrenAsyncTest()
+        {
+            var childrens = await _client.GetChildrenAsync("/");
+
+            Assert.NotNull(childrens);
+
+            Assert.True(childrens.Any());
+
+            childrens = await _client.GetChildrenAsync("/ApiRouteRoot");
+            Assert.NotNull(childrens);
+
+            Assert.True(childrens.Any());
+        }
+
+        [Fact]
+        public async Task GetDataAsyncTest()
+        {
+            var data = await _client.GetDataAsync("/");
+            Assert.NotNull(data);
+
+            data = await _client.GetDataAsync("/chanelInfo");
+            Assert.NotNull(data);
+        }
+
+        [Fact]
+        public async Task ReconnectionTest()
+        {
+            Assert.True(await _client.ExistsAsync("/"));
+            await Task.Delay(TimeSpan.FromSeconds(8));
+            Assert.True(await _client.ExistsAsync("/"));
+        }
+
+        [Fact]
+        public async Task SubscribeChildrenChangeTest()
+        {
+            var path = $"/{DateTime.Now:yyyy_MM_dd_HH_mm_ss_ff}";
+            var path2 = $"{path}/123";
+            try
+            {
+                if (await _client.ExistsAsync(path))
+                    await _client.DeleteRecursiveAsync(path);
+
+                var types = new List<Watcher.Event.EventType>();
+
+                var semaphore = new Semaphore(0, 2);
+
+                await _client.SubscribeDataChange(path, (client, args) =>
+                {
+                    if (args.Type == Watcher.Event.EventType.NodeCreated)
+                        semaphore.Release();
+                    return Task.CompletedTask;
+                });
+                await _client.SubscribeChildrenChange(path, (client, args) =>
+                {
+                    types.Add(args.Type);
+                    semaphore.Release();
+                    return Task.CompletedTask;
+                });
+
+                await _client.CreatePersistentAsync(path, null);
+                semaphore.WaitOne(10000);
+                await _client.CreatePersistentAsync(path2, null);
+                semaphore.WaitOne(10000);
+                Assert.Equal(Watcher.Event.EventType.NodeChildrenChanged, types[0]);
+            }
+            finally
+            {
+                if (await _client.ExistsAsync(path))
+                    await _client.DeleteRecursiveAsync(path);
+            }
         }
 
         [Fact]
@@ -137,46 +193,6 @@ namespace ZookeeperClient.Tests
             {
                 if (await _client.ExistsAsync(path))
                     await _client.DeleteAsync(path);
-            }
-        }
-
-        [Fact]
-        public async Task SubscribeChildrenChangeTest()
-        {
-            var path = $"/{DateTime.Now:yyyy_MM_dd_HH_mm_ss_ff}";
-            var path2 = $"{path}/123";
-            try
-            {
-                if (await _client.ExistsAsync(path))
-                    await _client.DeleteRecursiveAsync(path);
-
-                var types = new List<Watcher.Event.EventType>();
-
-                var semaphore = new Semaphore(0, 2);
-
-                await _client.SubscribeDataChange(path, (client, args) =>
-                {
-                    if (args.Type == Watcher.Event.EventType.NodeCreated)
-                        semaphore.Release();
-                    return Task.CompletedTask;
-                });
-                await _client.SubscribeChildrenChange(path, (client, args) =>
-                {
-                    types.Add(args.Type);
-                    semaphore.Release();
-                    return Task.CompletedTask;
-                });
-
-                await _client.CreatePersistentAsync(path, null);
-                semaphore.WaitOne(10000);
-                await _client.CreatePersistentAsync(path2, null);
-                semaphore.WaitOne(10000);
-                Assert.Equal(Watcher.Event.EventType.NodeChildrenChanged, types[0]);
-            }
-            finally
-            {
-                if (await _client.ExistsAsync(path))
-                    await _client.DeleteRecursiveAsync(path);
             }
         }
 
@@ -231,22 +247,6 @@ namespace ZookeeperClient.Tests
             await _client.DeleteAsync(path);
 
             Assert.Equal(1, count);
-        }
-
-        [Fact]
-        public async Task CreateRecursiveAndDeleteRecursiveTest()
-        {
-            var pathRoot = $"/{DateTime.Now:yyyy_MM_dd_HH_mm_ss_ff}";
-            var path = $"{pathRoot}/1/2";
-            if (await _client.ExistsAsync(pathRoot))
-                await _client.DeleteRecursiveAsync(pathRoot);
-
-            await _client.CreateRecursiveAsync(path, null);
-            Assert.True(await _client.ExistsAsync(path));
-
-            await _client.DeleteRecursiveAsync(pathRoot);
-            if (await _client.ExistsAsync(pathRoot))
-                throw new Exception("删除失败");
         }
     }
 }
